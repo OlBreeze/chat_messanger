@@ -6,7 +6,7 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from chat.routing import websocket_urlpatterns
 
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myproject.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chat_messanger.settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
