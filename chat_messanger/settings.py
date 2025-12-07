@@ -146,7 +146,12 @@ CHANNEL_LAYERS = {
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Security settings для продакшена
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+    # Render использует reverse proxy
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Убери или закомментируй эту строку:
+    # SECURE_SSL_REDIRECT = True  # ← Закомментируй или удали
+
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
