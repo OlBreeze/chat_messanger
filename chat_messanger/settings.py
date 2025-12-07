@@ -29,6 +29,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,8 +58,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'chat_messanger.wsgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -66,8 +65,6 @@ DATABASES = {
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -85,8 +82,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -96,8 +91,6 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     # Если хочешь добавить общие статические файлы для всего проекта
@@ -125,7 +118,8 @@ CSRF_TRUSTED_ORIGINS = [
 #     },
 # }
 # REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-REDIS_URL = os.environ.get('REDIS_URL', 'postgresql://chatdb_5xkh_user:wvNhjWV6llI4yUHkX7YiDMY8gPRoZNWR@dpg-d4ql3sggjchc73be1n10-a/chatdb_5xkh')
+REDIS_URL = os.environ.get('REDIS_URL',
+                           'postgresql://chatdb_5xkh_user:wvNhjWV6llI4yUHkX7YiDMY8gPRoZNWR@dpg-d4ql3sggjchc73be1n10-a/chatdb_5xkh')
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
