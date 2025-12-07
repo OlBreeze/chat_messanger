@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import dj_database_url  # pip install dj-database-url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Безопасность
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-me')
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 
@@ -109,14 +110,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 ASGI_APPLICATION = 'chat_messanger.asgi.application'
 
 # CSRF для продакшена
 CSRF_TRUSTED_ORIGINS = [
-    'https://your-app.railway.app',  # замени на свой домен
+    'https://*.onrender.com',  # Render домены
 ]
-
 
 # CHANNEL_LAYERS = {
 #     'default': {
@@ -126,12 +125,13 @@ CSRF_TRUSTED_ORIGINS = [
 #         },
 #     },
 # }
-
+# REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
+REDIS_URL = os.environ.get('REDIS_URL', 'postgresql://chatdb_5xkh_user:wvNhjWV6llI4yUHkX7YiDMY8gPRoZNWR@dpg-d4ql3sggjchc73be1n10-a/chatdb_5xkh')
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            "hosts": [REDIS_URL],
         },
     },
 }
@@ -142,3 +142,14 @@ CHANNEL_LAYERS = {
 #         "BACKEND": "channels.layers.InMemoryChannelLayer"
 #     }
 # }
+
+# WhiteNoise для эффективной раздачи статики
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Security settings для продакшена
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
