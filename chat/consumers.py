@@ -1,14 +1,28 @@
+# chat/consumers.py
+
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 
-# Глобальный счетчик (в продакшене используй Redis)
+# Глобальный счетчик
 online_users = {}
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_group_name = 'chat_room'
-        self.user = self.scope["user"]
+
+        # ИСПРАВЛЕНИЕ: Безопасное получение пользователя
+        self.user = self.scope.get("user")
+
+        # Если user не найден или анонимный
+        if not self.user or not hasattr(self.user, 'is_authenticated'):
+            self.user = None
+            self.is_authenticated = False
+            self.username = 'Guest'
+        else:
+            self.is_authenticated = self.user.is_authenticated
+            self.username = self.user.username if self.is_authenticated else 'Guest'
 
         # Присоединяемся к группе
         await self.channel_layer.group_add(
@@ -20,8 +34,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # ЗАДАЧА 1: Увеличиваем счетчик онлайн
         online_users[self.channel_name] = {
-            'username': self.user.username if self.user.is_authenticated else 'Guest',
-            'authenticated': self.user.is_authenticated
+            'username': self.username,
+            'authenticated': self.is_authenticated
         }
 
         # Отправляем всем обновленный счетчик
@@ -34,12 +48,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         # Отправляем приветственное сообщение
-        username = self.user.username if self.user.is_authenticated else 'Guest'
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'user_join',
-                'username': username
+                'username': self.username
             }
         )
 
@@ -79,7 +92,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         # ЗАДАЧА 3: Проверяем аутентификацию для сообщений
         if message_type == 'chat_message':
-            if not self.user.is_authenticated:
+            if not self.is_authenticated:
                 await self.send(text_data=json.dumps({
                     'type': 'error',
                     'message': 'You must be logged in to send messages'
@@ -94,11 +107,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'chat_message',
                     'message': message,
-                    'username': self.user.username
+                    'username': self.username
                 }
             )
 
-        # Push уведомления
+        # ЗАДАЧА 2: Push уведомления
         elif message_type == 'push_notification':
             notification_text = data.get('text', 'New notification!')
 
@@ -107,7 +120,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     'type': 'push_notification',
                     'text': notification_text,
-                    'sender': self.user.username if self.user.is_authenticated else 'Guest'
+                    'sender': self.username
                 }
             )
 

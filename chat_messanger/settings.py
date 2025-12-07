@@ -117,9 +117,7 @@ CSRF_TRUSTED_ORIGINS = [
 #         },
 #     },
 # }
-# REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
-REDIS_URL = os.environ.get('REDIS_URL',
-                           'postgresql://chatdb_5xkh_user:wvNhjWV6llI4yUHkX7YiDMY8gPRoZNWR@dpg-d4ql3sggjchc73be1n10-a/chatdb_5xkh')
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379')
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
